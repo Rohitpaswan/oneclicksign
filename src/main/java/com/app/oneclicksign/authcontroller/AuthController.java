@@ -1,16 +1,22 @@
 package com.app.oneclicksign.authcontroller;
 
 import com.app.oneclicksign.config.GoogleConfig;
+import com.app.oneclicksign.model.TokenResponse;
+import com.app.oneclicksign.model.UserInfo;
+import com.app.oneclicksign.utils.Utils;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.web.bind.annotation.GetMapping;
-
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.UUID;
+
 
 @RestController
 public class AuthController {
@@ -28,7 +34,7 @@ public class AuthController {
 		logger.info(state);
 		
 		// Build the Google authorization URL
-		String authUrl = UriComponentsBuilder.fromHttpUrl(googleConfig.getAuthUri())
+		return UriComponentsBuilder.fromHttpUrl(googleConfig.getAuthUri())
 				.queryParam("client_id", googleConfig.getClientId())
 				.queryParam("redirect_uri", googleConfig.getRedirectUri())
 				.queryParam("response_type", "code")
@@ -36,10 +42,37 @@ public class AuthController {
 				.queryParam("state", state)
 				.build().toUriString();
 		
-		return  authUrl;
-		
-		
 	}
 	
+	
+	@GetMapping("/callback")
+	public RedirectView callback(
+			@RequestParam(required = false) String code,
+			@RequestParam(required = false) String error,
+			@RequestParam String state,
+			HttpSession session,
+			RedirectAttributes redirectAttributes
+	) {
+		String savedState = (String) session.getAttribute("oauth_state");
+		if (!state.equals(savedState)) {
+			redirectAttributes.addAttribute("error", "Invalid state parameter");
+			return new RedirectView("/error");
+		}
+		
+		if (error != null) {
+			redirectAttributes.addAttribute("error", error);
+			return new RedirectView("/error");
+		}
+		
+		try {
+			TokenResponse tokenResponse = Utils.exchangeCodeForToken(code, googleConfig);
+			UserInfo userInfo = Utils.fetchUserInfo(tokenResponse.getAccessToken(), googleConfig);
+			session.setAttribute("user", userInfo);
+			return new RedirectView("/profile");
+		} catch (Exception e) {
+			redirectAttributes.addAttribute("error", e.getMessage());
+			return new RedirectView("/error");
+		}
+	}
 	
 }
