@@ -4,6 +4,9 @@ import com.app.oneclicksign.config.GoogleConfig;
 import com.app.oneclicksign.model.TokenResponse;
 import com.app.oneclicksign.model.UserInfo;
 import com.app.oneclicksign.utils.Utils;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +43,7 @@ public class AuthController {
 				.queryParam("response_type", "code")
 				.queryParam("scope", googleConfig.getScope())
 				.queryParam("state", state)
+				.queryParam("prompt", "consent")
 				.build().toUriString();
 		
 	}
@@ -73,6 +77,29 @@ public class AuthController {
 			redirectAttributes.addAttribute("error", e.getMessage());
 			return new RedirectView("/error");
 		}
+		
+		
 	}
+	
+	@GetMapping("/logout")
+	public String logout(HttpServletRequest request, HttpServletResponse response) {
+		// Invalidate session
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			session.invalidate();
+		}
+		
+		// clear cookies
+		Cookie cookie = new Cookie("JSESSIONID", null);
+		cookie.setPath("/");
+		cookie.setHttpOnly(true);
+		cookie.setMaxAge(0);
+		response.addCookie(cookie);
+		
+		// Redirect to homepage or login
+		return "/";
+	}
+	
+	
 	
 }
