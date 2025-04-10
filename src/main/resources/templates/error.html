@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/style.css}" />
+    <title>oneclicksign</title>
+
+</head>
+<body>
+<div class="flex-center position-r full-height" th:switch="${errorCode}">
+    <!-- Show error code if available, otherwise show 500 -->
+    <div class="code" th:case="'401'"> 401 : Security Error</div>
+    <div class="code" th:case="'404'"> 404 : User not found</div>
+    <div class="code" th:case="*"> 500 : Something went wrong</div>
+
+</div>
+
+</div>
+</body>
+</html>

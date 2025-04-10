@@ -9,7 +9,8 @@
 <div class="container mt-5 text-center">
     <div class="card p-4" style="max-width: 400px; margin: 0 auto;">
         <h2 class="mb-3">Welcome, <span th:text="${user.name}">Username</span>!</h2>
-        <img th:src="${user.picture}" alt="Profile Picture" class="rounded-circle mb-3" style="width: 100px;">
+        <img class="rounded-circle mb-3" style="width: 100px;" th:src="@{${user.picture}}" alt="Profile Picture">
+
         <p>Email: <strong th:text="${user.email}">email@example.com</strong></p>
     </div>
 

@@ -1,6 +1,8 @@
 package com.app.oneclicksign.authcontroller;
 
 import com.app.oneclicksign.config.GoogleConfig;
+import com.app.oneclicksign.exception.InvalidStateException;
+import com.app.oneclicksign.exception.OAuthUserInfoException;
 import com.app.oneclicksign.model.TokenResponse;
 import com.app.oneclicksign.model.UserInfo;
 import com.app.oneclicksign.utils.Utils;
@@ -23,7 +25,7 @@ import java.util.UUID;
 
 @RestController
 public class AuthController {
-	public static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+	
 	private final GoogleConfig googleConfig;
 	
 	public   AuthController(GoogleConfig googleConfig){
@@ -34,7 +36,7 @@ public class AuthController {
 	public String login(HttpSession session){
 		String state = UUID.randomUUID().toString();
 		session.setAttribute("oauth_state", state);
-		logger.info(state);
+		
 		
 		// Build the Google authorization URL
 		return UriComponentsBuilder.fromHttpUrl(googleConfig.getAuthUri())
@@ -59,8 +61,8 @@ public class AuthController {
 	) {
 		String savedState = (String) session.getAttribute("oauth_state");
 		if (!state.equals(savedState)) {
-			redirectAttributes.addAttribute("error", "Invalid state parameter");
-			return new RedirectView("/error");
+			
+			throw new InvalidStateException("Invalid state parameter received");
 		}
 		
 		if (error != null) {
@@ -73,7 +75,12 @@ public class AuthController {
 			UserInfo userInfo = Utils.fetchUserInfo(tokenResponse.getAccessToken(), googleConfig);
 			session.setAttribute("user", userInfo);
 			return new RedirectView("/profile");
-		} catch (Exception e) {
+		}
+		
+		catch (OAuthUserInfoException e) {
+			throw new OAuthUserInfoException("Failed to retrieve user info", e);
+		}
+		catch (Exception e) {
 			redirectAttributes.addAttribute("error", e.getMessage());
 			return new RedirectView("/error");
 		}
