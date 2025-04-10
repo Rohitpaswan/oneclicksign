@@ -3,14 +3,11 @@
 Implement OAuth2 authentication flow from scratch without using OAuth libraries.
 ## 📚 Table of Contents
 - [Overview](#overview)
-- [Architecture](#architecture)
+- [Architecture](##architecture)
 - [Installation & Setup](#installation--setup)
 - [Configuration](#configuration)
-- [Deployment](#deployment)
-- [Security Considerations](#security-considerations)
 - [API Reference](#api-reference)
-- [Testing](#testing)
-- [Troubleshooting](#troubleshooting)
+- [Deployment](#deployment)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -70,7 +67,7 @@ mvn clean package
 java -jar target/oneclicksign.jar
 ```
 
-### 🛠️ Configuration
+## 🛠️ Configuration
 #### 🌐 Google OAuth Setup
 
 Create OAuth 2.0 credentials via Google Cloud Console.
